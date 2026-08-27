@@ -2,6 +2,11 @@ import { readFile, writeFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  CONFIG_START,
+  injectConfig,
+  normaliseValues,
+} from "../wizard/snippet.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -22,14 +27,21 @@ export async function loadConfig() {
   }
 
   const pagesBaseUrl = `https://${raw.org}.github.io/${raw.repo}`;
+
+  // The macro's own settings share the CONFIG block with the derived values, so
+  // normalise them here against the same rules the wizard applies.
+  const { warningMinutes, alertDurationSeconds, alertTitle } = normaliseValues({
+    ...(raw.macro ?? {}),
+    name: raw.name,
+  });
+
   return {
     ...raw,
     author: raw.author ?? "",
     description: raw.description ?? "",
-    webapp: raw.webapp !== false,
+    macro: { warningMinutes, alertDurationSeconds, alertTitle },
     pagesBaseUrl,
     wizardUrl: `${pagesBaseUrl}/wizard/`,
-    webappUrl: `${pagesBaseUrl}/webapp/`,
     repoUrl: `https://github.com/${raw.org}/${raw.repo}`,
   };
 }
@@ -96,8 +108,8 @@ function appConfigFile(cfg) {
     title: cfg.title,
     pagesBaseUrl: cfg.pagesBaseUrl,
     wizardUrl: cfg.wizardUrl,
-    webappUrl: cfg.webappUrl,
     repoUrl: cfg.repoUrl,
+    macro: cfg.macro,
   };
   // A standalone, prettier-ignored file so generated JSON never fights the
   // formatter over key quoting or indentation inside index.html.
@@ -135,33 +147,26 @@ export async function applyConfig() {
     return JSON.stringify(pkg, null, 2) + "\n";
   });
 
-  // Static apps: rewrite <title> in place and (re)generate app-config.js. The
-  // HTML stays formatter-owned; only the generated JS carries derived values.
-  for (const dir of ["wizard", "webapp"]) {
-    if (!existsSync(join(ROOT, dir))) continue;
-    await updateFile(`${dir}/index.html`, (content) =>
+  // Wizard: rewrite <title> in place and (re)generate app-config.js. The HTML
+  // stays formatter-owned; only the generated JS carries derived values.
+  if (existsSync(join(ROOT, "wizard"))) {
+    await updateFile("wizard/index.html", (content) =>
       content.replace(
         /<title>[\s\S]*?<\/title>/,
         `<title>${escapeHtml(cfg.title)}</title>`,
       ),
     );
-    await writeGenerated(`${dir}/app-config.js`, appConfigFile(cfg));
+    await writeGenerated("wizard/app-config.js", appConfigFile(cfg));
   }
 
-  // Macros: every *.js under macros/ that carries the CONFIG markers.
-  const macroInner = [
-    `const MACRO_NAME = ${JSON.stringify(cfg.name)};`,
-    `const WEBAPP_URL = ${JSON.stringify(cfg.webappUrl)};`,
-  ].join("\n");
+  // Macros: every *.js under macros/ that carries the CONFIG markers. The block
+  // itself is built by wizard/snippet.js so the wizard's "Copy config" output
+  // and this script stay byte-identical.
+  const macroValues = { name: cfg.name, ...cfg.macro };
   for (const filePath of await listJsFiles(join(ROOT, "macros"))) {
     await updateFile(relative(ROOT, filePath), (content) => {
-      if (!content.includes("// CONFIG:start")) return content;
-      return replaceBetween(
-        content,
-        "// CONFIG:start",
-        "// CONFIG:end",
-        macroInner,
-      ).content;
+      if (!content.includes(CONFIG_START)) return content;
+      return injectConfig(content, macroValues);
     });
   }
 
@@ -181,17 +186,11 @@ export async function applyConfig() {
       "<!-- description:end -->",
       `\n${cfg.description}`,
     ).content;
-    const urls = [
-      `- Wizard: ${cfg.wizardUrl}`,
-      cfg.webapp ? `- Web app: ${cfg.webappUrl}` : null,
-    ]
-      .filter(Boolean)
-      .join("\n");
     next = replaceBetween(
       next,
       "<!-- urls:start -->",
       "<!-- urls:end -->",
-      `\n${urls}\n`,
+      `\n- Wizard: ${cfg.wizardUrl}\n`,
     ).content;
     // Set the repo name in the Questions section mailto subject. Matches the
     // current value so it stays re-runnable if the repo is renamed later.

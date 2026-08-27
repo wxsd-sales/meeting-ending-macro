@@ -1,5 +1,5 @@
 /*
- * Momentum Design System styling for the macro tooling web apps.
+ * Momentum Design System styling for the macro configuration wizard.
  *
  * Semantic aliases are layered on top of the Momentum Webex theme tokens
  * (light-stable / dark-stable). Every custom property is prefixed with
@@ -388,7 +388,7 @@ button:disabled {
   gap: 20px;
 }
 
-.webapp-function {
+.settings-panel {
   display: grid;
   gap: 20px;
   padding: clamp(24px, 4vw, 32px);
@@ -413,7 +413,7 @@ h2 {
   color: var(--wizard-text);
 }
 
-.webapp-function > p {
+.settings-panel > p {
   max-width: 52rem;
   margin: 0;
   color: var(--wizard-text-secondary);
@@ -421,7 +421,7 @@ h2 {
   line-height: 1.55;
 }
 
-.webapp-function code {
+.settings-panel code {
   padding: 1px 6px;
   border-radius: 6px;
   background: var(--wizard-surface-muted);

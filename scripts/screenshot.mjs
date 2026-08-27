@@ -86,9 +86,6 @@ const chromeBin = resolveChrome();
 mkdirSync(OUT_DIR, { recursive: true });
 
 const targets = [{ path: "/wizard/", name: "wizard" }];
-if (existsSync(join(ROOT, "webapp", "index.html"))) {
-  targets.push({ path: "/webapp/", name: "webapp" });
-}
 
 // Force each theme via the "#theme=" hash so captures are deterministic and do
 // not depend on the CI runner's OS colour-scheme preference.

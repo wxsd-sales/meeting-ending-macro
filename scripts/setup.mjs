@@ -53,11 +53,6 @@ const org = await ask("GitHub org/user", detected.org || current.org);
 const repo = toKebabCase(
   await ask("GitHub repo", detected.repo || current.repo || name),
 );
-const webappAnswer = await ask(
-  "Include advanced web app? (y/n)",
-  current.webapp !== false ? "y" : "n",
-);
-
 rl.close();
 
 const config = {
@@ -68,7 +63,9 @@ const config = {
   author,
   org,
   repo,
-  webapp: /^y(es)?$/i.test(webappAnswer),
+  // Carried over untouched: the macro's own settings are edited here or in the
+  // wizard, not prompted for during setup.
+  ...(current.macro ? { macro: current.macro } : {}),
 };
 
 await writeFile(CONFIG_PATH, JSON.stringify(config, null, 2) + "\n");

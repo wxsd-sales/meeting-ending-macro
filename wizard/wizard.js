@@ -1,4 +1,4 @@
-import { buildSnippet, injectConfig } from "./snippet.js";
+import { buildSnippet, DEFAULTS, injectConfig } from "./snippet.js";
 
 const config = window.APP_CONFIG ?? {};
 
@@ -24,24 +24,33 @@ const MACRO_SOURCE_URL = "../macros/main.js";
 
 /* Settings form -> live macro config snippet + macro download. */
 (function initSettings() {
-  const buttonNameInput = document.getElementById("button-name");
-  const webappUrlInput = document.getElementById("webapp-url");
   const output = document.getElementById("output");
   const copyButton = document.getElementById("copy-button");
   const downloadButton = document.getElementById("download-button");
   const exportStatus = document.getElementById("export-status");
 
-  if (!buttonNameInput || !webappUrlInput || !output) {
+  // Each entry maps a CONFIG value to its input and the seed shown on load.
+  const fields = [
+    { key: "warningMinutes", id: "warning-minutes" },
+    { key: "alertDurationSeconds", id: "alert-duration" },
+    { key: "alertTitle", id: "alert-title" },
+    { key: "name", id: "macro-name", seed: config.name },
+  ].map((field) => ({ ...field, input: document.getElementById(field.id) }));
+
+  if (!output || fields.some((field) => !field.input)) {
     return;
   }
 
-  buttonNameInput.value = config.name ?? "";
-  webappUrlInput.value = config.webappUrl ?? "";
+  const seeds = { ...DEFAULTS, ...(config.macro ?? {}) };
+  for (const field of fields) {
+    field.input.value = String(field.seed ?? seeds[field.key] ?? "");
+  }
 
-  const getValues = () => ({
-    name: buttonNameInput.value.trim(),
-    webappUrl: webappUrlInput.value.trim(),
-  });
+  // buildSnippet coerces and clamps these, so raw field text is safe to pass on.
+  const getValues = () =>
+    Object.fromEntries(
+      fields.map((field) => [field.key, field.input.value.trim()]),
+    );
 
   const downloadName = () => {
     const base =
@@ -66,8 +75,9 @@ const MACRO_SOURCE_URL = "../macros/main.js";
     output.textContent = buildSnippet(getValues());
   };
 
-  buttonNameInput.addEventListener("input", updatePreview);
-  webappUrlInput.addEventListener("input", updatePreview);
+  for (const field of fields) {
+    field.input.addEventListener("input", updatePreview);
+  }
   updatePreview();
 
   if (copyButton) {

@@ -39,10 +39,32 @@
       "minLength": 1,
       "description": "GitHub repository name (used for the Pages base URL)."
     },
-    "webapp": {
-      "type": "boolean",
-      "description": "Whether to build/deploy the optional advanced web app.",
-      "default": true
+    "macro": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Default macro settings written into the macro's CONFIG block.",
+      "properties": {
+        "warningMinutes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1440,
+          "description": "Minutes before the booking ends that the alert is shown.",
+          "default": 5
+        },
+        "alertDurationSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600,
+          "description": "Seconds the alert stays on screen; 0 leaves it up until cleared.",
+          "default": 30
+        },
+        "alertTitle": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Heading shown on the alert.",
+          "default": "Meeting ending soon"
+        }
+      }
     }
   }
 }

@@ -1,7 +1,7 @@
 {
-  "name": "my-macro",
+  "name": "meeting-ending-macro",
   "version": "1.0.0",
-  "description": "One sentence description of what this macro does.",
+  "description": "Alerts the room a configurable number of minutes before the current booking ends.",
   "license": "MIT",
   "author": "",
   "type": "module",

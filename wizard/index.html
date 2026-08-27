@@ -60,7 +60,7 @@
       integrity="sha384-xo4f17YKVYq4xv2I3xxGoS+l3GhukPTuhpQTP7FT+M0nq9gCMQkzpohl5DJo6Zom"
       crossorigin="anonymous"
     />
-    <title>My Macro</title>
+    <title>Meeting Ending Macro</title>
     <!-- Generated from project.config.json by scripts/apply-config.mjs. -->
     <script src="app-config.js"></script>
     <link rel="stylesheet" href="styles.css" />
@@ -188,7 +188,7 @@
         <div class="page-stack" aria-live="polite">
           <!-- General -->
           <section
-            class="webapp-function"
+            class="settings-panel"
             id="general"
             role="tabpanel"
             aria-labelledby="tab-general"
@@ -202,33 +202,73 @@
             </p>
 
             <form class="config-form" id="wizard-form" autocomplete="off">
+              <div class="field-row">
+                <div class="field">
+                  <label class="field__label" for="warning-minutes"
+                    >Warn this many minutes early</label
+                  >
+                  <input
+                    class="field__input"
+                    type="number"
+                    id="warning-minutes"
+                    name="warning-minutes"
+                    min="0"
+                    max="1440"
+                    step="1"
+                    placeholder="5"
+                  />
+                  <span class="field__hint"
+                    >How long before the booking's end time the alert
+                    appears.</span
+                  >
+                </div>
+                <div class="field">
+                  <label class="field__label" for="alert-duration"
+                    >Alert duration (seconds)</label
+                  >
+                  <input
+                    class="field__input"
+                    type="number"
+                    id="alert-duration"
+                    name="alert-duration"
+                    min="0"
+                    max="3600"
+                    step="1"
+                    placeholder="30"
+                  />
+                  <span class="field__hint"
+                    >How long the alert stays on screen. Use 0 to leave it up
+                    until it is dismissed.</span
+                  >
+                </div>
+              </div>
               <div class="field">
-                <label class="field__label" for="button-name"
-                  >Button name</label
+                <label class="field__label" for="alert-title"
+                  >Alert title</label
                 >
                 <input
                   class="field__input"
                   type="text"
-                  id="button-name"
-                  name="button-name"
-                  placeholder="my-macro"
+                  id="alert-title"
+                  name="alert-title"
+                  maxlength="255"
+                  placeholder="Meeting ending soon"
                 />
                 <span class="field__hint"
-                  >Shown on the device home screen and used as the WebView
-                  title.</span
+                  >Heading shown above the remaining time on the alert.</span
                 >
               </div>
               <div class="field">
-                <label class="field__label" for="webapp-url">Web app URL</label>
+                <label class="field__label" for="macro-name">Macro name</label>
                 <input
                   class="field__input"
-                  type="url"
-                  id="webapp-url"
-                  name="webapp-url"
-                  placeholder="https://org.github.io/repo/webapp/"
+                  type="text"
+                  id="macro-name"
+                  name="macro-name"
+                  placeholder="meeting-ending-macro"
                 />
                 <span class="field__hint"
-                  >The page the macro opens in an on-device WebView.</span
+                  >Used to identify the macro in the device log.</span
                 >
               </div>
             </form>
@@ -236,7 +276,7 @@
 
           <!-- Export -->
           <section
-            class="webapp-function"
+            class="settings-panel"
             id="export"
             role="tabpanel"
             aria-labelledby="tab-export"

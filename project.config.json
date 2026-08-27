@@ -1,10 +1,14 @@
 {
   "$schema": "./project.config.schema.json",
-  "name": "my-macro",
-  "title": "My Macro",
-  "description": "One sentence description of what this macro does.",
+  "name": "meeting-ending-macro",
+  "title": "Meeting Ending Macro",
+  "description": "Alerts the room a configurable number of minutes before the current booking ends.",
   "author": "",
   "org": "wxsd-sales",
-  "repo": "my-macro",
-  "webapp": true
+  "repo": "meeting-ending-macro",
+  "macro": {
+    "warningMinutes": 5,
+    "alertDurationSeconds": 30,
+    "alertTitle": "Meeting ending soon"
+  }
 }
